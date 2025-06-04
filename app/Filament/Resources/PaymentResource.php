@@ -30,15 +30,14 @@ class PaymentResource extends Resource
         return $form
             ->schema([
                 Select::make('booking_id')
-                    ->relationship('booking', 'id') // Displaying booking ID, consider a more descriptive column
-                    // ->getOptionLabelFromRecordUsing(fn (Booking $record) => "Booking #{$record->id} - {$record->user->name} - {$record->field->name}")
+                ->relationship('booking', 'id')
                     ->searchable()
                     ->preload()
                     ->required(),
                 TextInput::make('payment_method')
                     ->required()
                     ->maxLength(255),
-                Select::make('payment_status') // Using Select for predefined statuses
+            Select::make('payment_status')
                     ->options([
                         'pending' => 'Pending',
                         'paid' => 'Paid',
@@ -47,9 +46,11 @@ class PaymentResource extends Resource
                     ])
                     ->required(),
                 FileUpload::make('proof')
-                    ->image() // Specify that it's an image for preview and validation
-                    ->directory('payment-proofs') // Optional: directory to store uploads
-                    ->nullable(),
+                ->image()
+                ->directory('payment-proofs') // File akan disimpan di 'storage/app/public/payment-proofs'
+                ->disk('public') // MENENTUKAN DISK PENYIMPANAN KE 'public'
+                ->visibility('public') // MENENTUKAN VISIBILITAS FILE KE 'public'
+                ->nullable(),
             ]);
     }
 
@@ -57,20 +58,20 @@ class PaymentResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('booking_id')->searchable()->sortable()->label('Booking ID'),
-                // You can display more booking info like:
-                // TextColumn::make('booking.user.name')->searchable()->sortable()->label('User'),
-                // TextColumn::make('booking.field.name')->searchable()->sortable()->label('Field'),
+            TextColumn::make('booking_id')->searchable()->sortable()->label('Booking ID'),
                 TextColumn::make('payment_method')->searchable()->sortable(),
-                TextColumn::make('payment_status')->badge() // Display as a badge
-                    ->color(fn(string $state): string => match ($state) {
-                        'pending' => 'warning',
+            TextColumn::make('payment_status')->badge()
+                ->color(fn(string $state): string => match (strtolower($state)) { // Menggunakan strtolower untuk konsistensi
+                    'pending' => 'warning',
                         'paid' => 'success',
                         'failed' => 'danger',
                         'refunded' => 'info',
                         default => 'gray',
                     })->searchable()->sortable(),
-                ImageColumn::make('proof')->square()->toggleable(), // Display image, make it toggleable
+            ImageColumn::make('proof')
+                ->disk('public') // MENENTUKAN DISK UNTUK MENGAMBIL GAMBAR DARI 'public'
+                ->square()
+                ->toggleable(),
                 TextColumn::make('created_at')->dateTime()->sortable()->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
