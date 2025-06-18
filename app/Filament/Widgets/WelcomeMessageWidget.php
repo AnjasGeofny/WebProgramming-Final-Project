@@ -26,13 +26,14 @@ class WelcomeMessageWidget extends Widget
         $user = Auth::user();
 
         if ($user) {
-            $this->userName = $user->name; // Asumsi model User memiliki atribut 'name'
+            $this->userName = $user->name ?? 'User'; // Fallback jika name null
             // Asumsi model User memiliki atribut 'role' (misalnya 'admin', 'user')
             // ucfirst() digunakan untuk membuat huruf pertama kapital (Admin, User)
-            $this->userRole = $user->role ? ucfirst($user->role) : null;
+            $this->userRole = isset($user->role) && $user->role ? ucfirst($user->role) : 'Admin';
         } else {
             // Fallback jika karena suatu alasan user tidak terautentikasi saat widget di-load
             $this->userName = 'Guest';
+            $this->userRole = null;
         }
     }
 }

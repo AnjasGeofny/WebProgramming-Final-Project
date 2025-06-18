@@ -10,10 +10,11 @@ class Schedule extends Model
     use HasFactory;
 
     protected $fillable = [
+        'field_id',
         'date',
         'start_time',
         'end_time',
-        // 'field_id', // Add if you uncommented the foreign key in the migration
+        'is_available',
     ];
 
     /**
@@ -23,7 +24,16 @@ class Schedule extends Model
      */
     protected $casts = [
         'date' => 'date',
+        'is_available' => 'boolean',
     ];
+
+    /**
+     * Get the field for the schedule.
+     */
+    public function field()
+    {
+        return $this->belongsTo(Field::class);
+    }
 
     /**
      * Get the bookings for the schedule.
@@ -33,9 +43,22 @@ class Schedule extends Model
         return $this->hasMany(Booking::class);
     }
 
-    // Optional: if a schedule belongs to a specific field directly
-    // public function field()
-    // {
-    //     return $this->belongsTo(Field::class);
-    // }
+    /**
+     * Get all bookings for this schedule (including those with multiple schedules).
+     */
+    public function getAllBookings()
+    {
+        return Booking::where(function ($query) {
+            $query->where('schedule_id', $this->id)
+                ->orWhere('schedule_ids', 'LIKE', '%"' . $this->id . '"%');
+        })->where('status', '!=', 'cancelled');
+    }
+
+    /**
+     * Check if this schedule slot is available for booking.
+     */
+    public function isAvailable()
+    {
+        return $this->is_available && $this->getAllBookings()->count() === 0;
+    }
 }

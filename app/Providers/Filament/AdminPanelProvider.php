@@ -21,6 +21,10 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use App\Filament\Widgets\WelcomeMessageWidget;
 use App\Filament\Widgets\StatsOverviewWidget;
 use App\Filament\Widgets\BookingsChart;
+use App\Filament\Widgets\ScheduleOverview;
+use App\Filament\Widgets\FieldStatusWidget;
+use App\Filament\Widgets\LiveBookingWidget;
+use App\Filament\Widgets\FieldListWidget;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -31,22 +35,24 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin') // URL untuk panel admin Anda, e.g., yoursite.com/admin
             ->login() // Mengaktifkan halaman login default Filament
+            ->brandName('Admin Balikpapan Sport') // Nama brand yang ditampilkan di halaman login
             ->colors([
                 'primary' => Color::Amber, // Anda bisa mengganti warna primer sesuai keinginan
             ])
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
+            ->resources([
+                \App\Filament\Resources\BookingResource::class,
+                \App\Filament\Resources\FieldResource::class,
+                \App\Filament\Resources\ScheduleResource::class,
+                \App\Filament\Resources\UserResource::class,
+            ])
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
                 Pages\Dashboard::class, // Halaman dashboard default
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                // Daftarkan semua widget kustom Anda di sini
-                // Urutan dalam array ini bisa mempengaruhi urutan default jika $sort tidak di-set di widget
+                    // Hanya widget utama yang diperlukan
                 WelcomeMessageWidget::class,
                 StatsOverviewWidget::class,
-                BookingsChart::class,
-
             ])
             ->middleware([
                 EncryptCookies::class,

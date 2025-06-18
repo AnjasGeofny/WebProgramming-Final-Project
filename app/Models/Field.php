@@ -13,6 +13,8 @@ class Field extends Model
         'name',
         'location',
         'type',
+        'image',
+        'court_number',
         'price_per_hour',
     ];
 
@@ -31,5 +33,13 @@ class Field extends Model
     public function bookings()
     {
         return $this->hasMany(Booking::class);
+    }
+
+    /**
+     * Get the schedules for the field.
+     */
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class);
     }
 }
